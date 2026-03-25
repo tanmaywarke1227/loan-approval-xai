@@ -1,14 +1,9 @@
-# =============================================================================
-#  utils.py  —  Helper functions shared by train_model.py and app.py
-# =============================================================================
-
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import joblib
 import os
 
-# ── Paths ─────────────────────────────────────────────────────────────────────
 DATA_PATH     = os.path.join("data", "loan_data.csv")
 MODEL_DIR     = "models"
 MODEL_PATH    = os.path.join(MODEL_DIR, "loan_model.pkl")
@@ -16,7 +11,7 @@ SCALER_PATH   = os.path.join(MODEL_DIR, "scaler.pkl")
 ENCODER_PATH  = os.path.join(MODEL_DIR, "encoders.pkl")
 FEATURES_PATH = os.path.join(MODEL_DIR, "feature_names.pkl")
 
-# ── Column definitions ────────────────────────────────────────────────────────
+
 CATEGORICAL_COLS = ["Gender", "Married", "Dependents", "Education", "Self_Employed", "Property_Area"]
 NUMERIC_COLS     = ["LoanAmount", "Loan_Amount_Term", "Credit_History"]
 SCALE_COLS       = ["LoanAmount", "Loan_Amount_Term", "TotalIncome"]
@@ -83,7 +78,7 @@ def encode_categoricals(df, fit=True, encoders=None):
                 df[col] = le.fit_transform(df[col])
                 encoders[col] = le
     else:
-        # Inference mode — use saved encoders, only for input features
+    
         for col in CATEGORICAL_COLS:
             if col in df.columns and col in encoders:
                 df[col] = encoders[col].transform(df[col])
@@ -128,25 +123,24 @@ def generate_explanation(shap_vals, feature_names, prediction):
     -------
     str — human-readable explanation
     """
-    # Sort features by absolute SHAP value (most impactful first)
+    
     pairs = sorted(
         zip(feature_names, shap_vals),
         key=lambda x: abs(x[1]),
         reverse=True
     )
 
-    # Separate positive (approval) and negative (rejection) contributors
     positive = [f.replace("_", " ").lower() for f, v in pairs if v > 0][:2]
     negative = [f.replace("_", " ").lower() for f, v in pairs if v < 0][:2]
 
-    if prediction == 0:  # Rejected
+    if prediction == 0: 
         reasons = ", ".join(negative) if negative else "multiple weak factors"
         return (
             f"Loan REJECTED. "
             f"The main factors working against this application: {reasons}. "
             f"Improving credit history and increasing income may help re-qualify."
         )
-    else:  # Approved
+    else: 
         reasons = ", ".join(positive) if positive else "strong overall profile"
         return (
             f"Loan APPROVED. "
