@@ -52,9 +52,10 @@ st.set_page_config(
 # =============================================================================
 @st.cache_resource
 def load_artifacts():
-    """Load model, scaler, encoders and feature names from disk."""
+    """Train model if not present, then load artifacts."""
     if not os.path.exists(MODEL_PATH):
-        return None, None, None, None
+        import subprocess
+        subprocess.run(["python", "train_model.py"], check=True)
     model    = joblib.load(MODEL_PATH)
     scaler   = joblib.load(SCALER_PATH)
     encoders = joblib.load(ENCODER_PATH)
